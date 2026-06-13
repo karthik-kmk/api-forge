@@ -1,0 +1,78 @@
+_format_version: "3.0"
+
+services:
+  - name: apiforge
+    url: http://apiforge:8000
+
+    routes:
+      - name: docs
+        paths:
+          - /docs
+          - /openapi.json
+        strip_path: false
+
+      - name: auth
+        paths:
+          - /auth
+        strip_path: false
+
+      - name: api-keys
+        paths:
+          - /api-keys
+        strip_path: false
+
+      - name: capabilities
+        paths:
+          - /capabilities
+        strip_path: false
+
+      - name: analytics
+        paths:
+          - /analytics
+        strip_path: false
+
+      - name: ocr
+        paths:
+          - /v1/ocr
+        strip_path: false
+
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 5
+              policy: local
+
+      - name: pdf
+        paths:
+          - /v1/pdf
+        strip_path: false
+
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 5
+              policy: local
+
+      - name: email
+        paths:
+          - /v1/email
+        strip_path: false
+
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 5
+              policy: local
+
+      - name: screenshot
+        paths:
+          - /v1/screenshot
+        strip_path: false
+        methods:
+          - POST
+
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 5
+              policy: local

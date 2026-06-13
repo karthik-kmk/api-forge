@@ -1,0 +1,2 @@
+class PDFGenerationException(Exception):
+    pass
