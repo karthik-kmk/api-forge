@@ -1,6 +1,11 @@
 # APIForge
 
-APIForge is a modular API Platform built with **FastAPI**, **PostgreSQL**, and **Kong API Gateway**.
+![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
+![Kong](https://img.shields.io/badge/Kong-3.8-purple)
+![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+
+APIForge is an end-to-end API Platform MVP built with **FastAPI**, **PostgreSQL**, and **Kong API Gateway**.
 
 It enables developers to:
 
@@ -11,6 +16,33 @@ It enables developers to:
 * Track API usage
 * View analytics
 * Access APIs through Kong API Gateway with rate limiting
+
+---
+
+## Quick Start
+
+Clone the repository:
+
+```bash
+git clone <repo-url>
+
+cd APIForge
+```
+
+Start all services:
+
+```bash
+docker compose up --build -d
+```
+
+Available Services:
+
+| Service    | URL                        |
+| ---------- | -------------------------- |
+| FastAPI    | http://localhost:8000      |
+| Swagger UI | http://localhost:8000/docs |
+| Kong Proxy | http://localhost:8080      |
+| Kong Admin | http://localhost:8001      |
 
 ---
 
@@ -49,18 +81,6 @@ It enables developers to:
 * JWT Authentication
 * Current User API
 
-Endpoints:
-
-```http
-POST /auth/signup
-
-POST /auth/login
-
-GET /auth/me
-```
-
----
-
 ### API Key Management
 
 * Generate API Keys
@@ -68,318 +88,36 @@ GET /auth/me
 * Revoke API Keys
 * SHA256 Key Hashing
 
-Endpoints:
-
-```http
-POST   /api-keys
-
-GET    /api-keys
-
-DELETE /api-keys/{id}
-```
-
-Example API Key:
-
-```text
-apiforge_live_xxxxxxxxxxxxxxxxx
-```
-
-Stored as:
-
-```text
-SHA256(api_key)
-```
-
----
-
 ### Capability Registry
 
-APIForge supports dynamic capability discovery.
+* Capability Registration
+* Capability Discovery
+* Capability Activation / Deactivation
 
-Endpoints:
+### Available Capabilities
 
-```http
-POST /capabilities
+* OCR API
+* PDF Generation API
+* Email Validation API
+* Website Screenshot API
 
-GET /capabilities
+### Platform Features
 
-GET /capabilities/{id}
-
-PATCH /capabilities/{id}/activate
-
-PATCH /capabilities/{id}/deactivate
-```
-
----
-
-## Available Capabilities
-
-| Capability         | Endpoint           | Authentication |
-| ------------------ | ------------------ | -------------- |
-| OCR                | `/v1/ocr/extract`  | API Key        |
-| PDF Generation     | `/v1/pdf/generate` | API Key        |
-| Email Validation   | `/v1/email/verify` | API Key        |
-| Website Screenshot | `/v1/screenshot`   | API Key        |
+* API Key Authentication
+* Usage Tracking Middleware
+* Analytics APIs
+* Kong API Gateway
+* Gateway-Level Rate Limiting
 
 ---
 
-## OCR API
-
-Extract text from images.
-
-```http
-POST /v1/ocr/extract
-```
-
-Uses:
-
-* pytesseract
-* Pillow
-* OpenCV
-
-Response:
-
-```json
-{
-  "text": "Hello World"
-}
-```
-
----
-
-## PDF Generation API
-
-Generate PDFs dynamically.
-
-```http
-POST /v1/pdf/generate
-```
-
-Uses:
-
-* ReportLab
-
-Response:
-
-```text
-application/pdf
-```
-
----
-
-## Email Validation API
-
-Validate email addresses.
-
-```http
-POST /v1/email/verify
-```
-
-Checks:
-
-* Syntax Validation
-* MX Record Validation
-* Disposable Email Detection
-
-Example Response:
-
-```json
-{
-  "email":"john@gmail.com",
-
-  "valid_syntax": true,
-
-  "mx_found": true,
-
-  "disposable": false,
-
-  "is_valid": true
-}
-```
-
----
-
-## Website Screenshot API
-
-Capture website screenshots using Playwright.
-
-```http
-POST /v1/screenshot
-```
-
-Example Request:
-
-```json
-{
-  "url":"https://example.com",
-
-  "full_page": true,
-
-  "width": 1280,
-
-  "height": 720
-}
-```
-
-Response:
-
-```text
-image/png
-```
-
-Security:
-
-* Blocks localhost
-* Blocks private IPs
-* Blocks file:// URLs
-* Prevents SSRF attacks
-
----
-
-## API Key Authentication
-
-Capability APIs are protected using API Keys.
-
-Flow:
-
-```text
-Read x-api-key
-
-↓
-
-Hash API Key
-
-↓
-
-Lookup api_keys table
-
-↓
-
-Validate Active
-
-↓
-
-Return APIKey
-```
-
-The authenticated API key is stored in:
-
-```python
-request.state.api_key
-```
-
----
-
-## Usage Tracking
-
-APIForge automatically tracks API usage using middleware.
-
-Tracked Fields:
-
-* API Key
-* Endpoint
-* Method
-* Status Code
-* Latency
-* Timestamp
-
-Tracked capabilities:
-
-* OCR
-* PDF Generation
-* Email Validation
-* Website Screenshot
-* Future Capabilities
-
----
-
-## Analytics
-
-Analytics APIs are protected using JWT.
-
-Endpoints:
-
-```http
-GET /analytics/usage
-
-GET /analytics/top-capabilities
-
-GET /analytics/request-volume
-```
-
-Example:
-
-```json
-{
-  "total_requests": 120,
-
-  "ocr_requests": 50,
-
-  "pdf_requests": 30,
-
-  "email_requests": 20,
-
-  "screenshot_requests": 20
-}
-```
-
----
-
-## Kong API Gateway
-
-APIForge uses Kong Gateway in **DB-less mode**.
-
-Responsibilities:
-
-* Routing
-* Rate Limiting
-* Gateway Policies
-
-Configured Routes:
-
-```text
-/auth
-
-/api-keys
-
-/capabilities
-
-/analytics
-
-/v1/ocr
-
-/v1/pdf
-
-/v1/email
-
-/v1/screenshot
-```
-
----
-
-## Rate Limiting
-
-Implemented using Kong Rate Limiting Plugin.
-
-Example:
-
-```yaml
-plugins:
-
-  - name: rate-limiting
-
-    config:
-
-      minute: 5
-
-      policy: local
-```
-
-After exceeding the limit:
-
-```text
-429 Too Many Requests
-```
+## Security
+
+* JWT authentication for management APIs
+* API Key authentication for capability APIs
+* SHA256 hashing for API Keys
+* Kong Gateway rate limiting
+* SSRF protection for Website Screenshot API
 
 ---
 
@@ -396,31 +134,35 @@ services/
 
 │   ├── app/
 
-│   ├── auth/
+│   │   ├── auth/
 
-│   ├── api_keys/
+│   │   ├── api_keys/
 
-│   ├── capabilities/
+│   │   ├── capabilities/
 
-│   ├── ocr/
+│   │   ├── ocr/
 
-│   ├── pdf/
+│   │   ├── pdf/
 
-│   ├── email_validation/
+│   │   ├── email_validation/
 
-│   ├── screenshot/
+│   │   ├── screenshot/
 
-│   ├── usage/
+│   │   ├── usage/
 
-│   ├── analytics/
+│   │   ├── analytics/
 
-│   ├── core/
+│   │   ├── core/
 
-│   ├── db/
+│   │   ├── db/
 
-│   ├── models/
+│   │   └── models/
 
-│   └── main.py
+│   │
+
+│   ├── Dockerfile
+
+│   └── requirements.txt
 
 │
 
@@ -431,33 +173,6 @@ services/
 
 docker-compose.yml
 ```
-
----
-
-## Running Locally
-
-Clone:
-
-```bash
-git clone <repo-url>
-
-cd APIForge
-```
-
-Start Services:
-
-```bash
-docker compose up --build -d
-```
-
-Available Services:
-
-| Service    | URL                        |
-| ---------- | -------------------------- |
-| FastAPI    | http://localhost:8000      |
-| Swagger UI | http://localhost:8000/docs |
-| Kong Proxy | http://localhost:8080      |
-| Kong Admin | http://localhost:8001      |
 
 ---
 
